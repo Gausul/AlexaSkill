@@ -1,11 +1,25 @@
+/**
+ 
+ Copyright 2016 Brian Donohue.
+ 
+*/
+
 'use strict';
 
+// Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
-
 exports.handler = function (event, context) {
     try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
 
+        /**
+         * Uncomment this if statement and populate with your skill's application ID to
+         * prevent someone else from configuring a skill that sends requests to this function.
+         */
+		 
+    if (event.session.application.applicationId !== "amzn1.ask.skill.2afdafd7-75a8-43fb-b541-ce592c966153") {
+        context.fail("Invalid Application ID");
+     }
 
         if (event.session.new) {
             onSessionStarted({requestId: event.request.requestId}, event.session);
@@ -49,8 +63,8 @@ function onLaunch(launchRequest, session, callback) {
     console.log("onLaunch requestId=" + launchRequest.requestId
         + ", sessionId=" + session.sessionId);
 
-    var cardTitle = "Hello, World!"
-    var speechOutput = "You can tell Hello, World! to say Hello, World!"
+    var cardTitle = "New Joke!"
+    var speechOutput = "You can tell NewJoke! to say Joke!"
     callback(session.attributes,
         buildSpeechletResponse(cardTitle, speechOutput, "", true));
 }
@@ -66,11 +80,16 @@ function onIntent(intentRequest, session, callback) {
         intentName = intentRequest.intent.name;
 
     // dispatch custom intents to handlers here
-    if (intentName == 'TestIntent') {
+    if (intentName == 'NewJokeIntent') {
+        handleTestRequest(intent, session, callback);
+    }
+    else if (intentName == 'OpenIntent') {
         handleTestRequest(intent, session, callback);
     }
     else {
-        throw "Invalid intent";
+        
+        handleTestRequest(intent, session, callback);
+       // throw "Invalid intent";
     }
 }
 
@@ -86,8 +105,13 @@ function onSessionEnded(sessionEndedRequest, session) {
 }
 
 function handleTestRequest(intent, session, callback) {
+    var myArray = ['The toughest part of a diet isn’t watching what you eat.  It’s watching what other people eat.', 
+    'Can a kangaroo jump higher than a house? Of course, a house doesn’t jump at all.', 
+    'Anton, do you think I’m a bad mother? My name is Paul','Headmaster: I haveve had complaints about you, Johnny, from all your teachers. What have you been doing? Johnny: Nothing, sir. Headmaster: Exactly'];    
+    var rand = myArray[Math.floor(Math.random() * myArray.length)];
+    
     callback(session.attributes,
-        buildSpeechletResponseWithoutCard("Hello, World!", "", "true"));
+        buildSpeechletResponseWithoutCard("New Joke,"+rand, "", "true"));
 }
 
 // ------- Helper functions to build responses -------
@@ -125,7 +149,7 @@ function buildSpeechletResponseWithoutCard(output, repromptText, shouldEndSessio
                 text: repromptText
             }
         },
-        shouldEndSession: shouldEndSession
+        //shouldEndSession: shouldEndSession
     };
 }
 
